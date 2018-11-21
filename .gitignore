@@ -14,5 +14,3 @@ htmlcov/
 dist/
 build/
 *.egg-info/
-
-project/config.py

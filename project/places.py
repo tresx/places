@@ -1,7 +1,7 @@
 import googlemaps
 import json
-from flask import (Blueprint, flash, g, redirect, render_template, request,
-                   url_for)
+from flask import (Blueprint, current_app, flash, g, redirect,
+                   render_template, request, url_for)
 from werkzeug.exceptions import abort
 
 from project.auth import login_required
@@ -9,12 +9,12 @@ from project.db import get_db
 
 bp = Blueprint('places', __name__)
 
-api_key = 'AIzaSyCXAbmleEBcC5zBdz5R_4cLVG5HVUzIh84'
-gmaps = googlemaps.Client(key=api_key)
 
 
 @bp.route('/')
 def index():
+    api_key = current_app.config.get('API_KEY')
+    print(api_key)
     return render_template('places/index.html',
                            api_key=api_key)
 
@@ -56,6 +56,8 @@ def locations():
 @bp.route('/add', methods=('GET', 'POST'))
 @login_required
 def add():
+    api_key = current_app.config.get('API_KEY')
+    gmaps = googlemaps.Client(key=api_key)
     if request.method == 'POST':
         name = request.form['name']
         description = request.form['description']
@@ -123,14 +125,14 @@ def search():
                         rating['rating'] for rating in ratings)/len(ratings)
         return render_template('places/search.html', results=results)
 
-    # TODO: This displays 'Sorry, no results found' on initial render...
-    #       it shouldn't
+    # TODO: Should not display 'Sorry, no results found' on initial render
     return render_template('places/search.html')
 
 
 @bp.route('/place/<place_id>', methods=('GET', 'POST'))
 def place(place_id):
     """Details page for a single place."""
+    api_key = current_app.config.get('API_KEY')
     if request.method == 'POST':
         # Add review to the database
         rating = request.form['rating']
