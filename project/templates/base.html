@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<title>{% block title %}{% endblock %} - Places</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<nav class="nav-upper">
+	<h1>Places</h1>
+	<ul>
+		{% if g.user %}
+			<li><span>{{ g.user['username'] }}</span>
+			<li><a href="{{ url_for('auth.logout') }}">Log Out</a>
+		{% else %}
+			<li><a href="{{ url_for('auth.register') }}">Register</a>
+			<li><a href="{{ url_for('auth.login') }}">Log In</a>
+		{% endif %}
+	</ul>
+</nav>
+<nav class="nav-lower">
+	<a {% if active_page == 'index' %}class="active" {% endif %}
+	   href="{{ url_for('index') }}">Map</a>
+	<a {% if active_page == 'search' %}class="active" {% endif %}
+	   href="{{ url_for('places.search') }}">Search</a>
+	{% if g.user %}
+		<a {% if active_page == 'add' %}class="active" {% endif %}
+		   href="{{ url_for('places.add') }}">Add</a>
+	{% endif %}
+</nav>
+<section class="content">
+	<header>
+		{% block header %}{% endblock %}
+	</header>
+	{% for message in get_flashed_messages() %}
+		<div class="flash">{{ message }}</div>
+	{% endfor %}
+	{% block content %}{% endblock %}
+</section>

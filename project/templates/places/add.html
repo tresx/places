@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% set active_page = 'add' %}
+
+{% block header %}
+	<h1>{% block title %}Add Location{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+	<form method="post">
+		<label for="name">Name</label>
+		<input name="name" id="name" value="{{ request.form['name'] }}"
+		       required>
+		<label for="description">Description</label>
+		<textarea name="description"
+			id="description">{{ request.form['description'] }}</textarea>
+		<label for="postcode">Postcode</label>
+		<input name="postcode" id="postcode"
+		       value="{{ request.form['postcode'] }}" required>
+		<button type="submit">Save</button>
+	</form>
+{% endblock %}

@@ -1,0 +1,177 @@
+import googlemaps
+import json
+from flask import (Blueprint, flash, g, redirect, render_template, request,
+                   url_for)
+from werkzeug.exceptions import abort
+
+from project.auth import login_required
+from project.db import get_db
+
+bp = Blueprint('places', __name__)
+
+api_key = 'AIzaSyCXAbmleEBcC5zBdz5R_4cLVG5HVUzIh84'
+gmaps = googlemaps.Client(key=api_key)
+
+
+@bp.route('/')
+def index():
+    return render_template('places/index.html',
+                           api_key=api_key)
+
+
+@bp.route('/locations')
+def locations():
+    """AJAX endpoint, return locations within 1 degree lat/lng as JSON."""
+    db = get_db()
+    lat = request.args.get('lat')
+    min_lat = float(lat) - 1 
+    max_lat = float(lat) + 1
+    lng = request.args.get('lng')
+    min_lng = float(lng) - 1
+    max_lng = float(lng) + 1
+
+    locations = db.execute("""
+        SELECT *
+        FROM location
+        WHERE lat > ? AND lat < ? AND lng > ? AND lng < ?""",
+        (min_lat, max_lat, min_lng, max_lng)).fetchall()
+    results = [{
+        'id': row['id'],
+        'name': row['name'],
+        'description': row['description'],
+        'postcode': row['postcode']} for row in locations]
+    for result in results:
+        ratings = db.execute("""
+            SELECT rating FROM review
+            WHERE location_id = ?""", str(result['id'])).fetchall()
+        if ratings:
+            result['average_rating'] = round(
+                sum(rating['rating'] for rating in ratings)/len(ratings), 1)
+        else:
+            result['average_rating'] = 'None'
+
+    return json.dumps(results)
+
+
+@bp.route('/add', methods=('GET', 'POST'))
+@login_required
+def add():
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        postcode = request.form['postcode']
+
+        # Calculate lat and lng from postcode and insert into database as well
+        geocode_result = gmaps.geocode(postcode)
+        lat = geocode_result[0]['geometry']['location']['lat']
+        lng = geocode_result[0]['geometry']['location']['lng']
+
+        error = None
+        if not name or not description or not postcode:
+            error = 'Name, description and postcode are required.'
+        elif not geocode_result:
+            error = 'Error geocoding postcode.'
+        if error is not None:
+            flash(error)
+        else:
+            db = get_db()
+            db.execute("""
+                INSERT INTO location (
+                    name,
+                    description,
+                    postcode,
+                    user_id,
+                    lat,
+                    lng
+                )
+                VALUES (?, ?, ?, ?, ?, ?)""",
+                (name, description, postcode, g.user['id'], lat, lng))
+            db.commit()
+            flash('Location added!')
+            return redirect(url_for('places.index'))
+    return render_template('places/add.html')
+
+
+@bp.route('/search', methods=('GET', 'POST'))
+def search():
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        postcode = request.form['postcode']
+        error = None
+        results = []
+        if not name and not description and not postcode:
+            error = 'Please enter a name, description or postcode.'
+        if error is not None:
+            flash(error)
+        else:
+            db = get_db()
+            results = db.execute("""
+                SELECT *
+                FROM location
+                WHERE name LIKE ?
+                    AND description LIKE ?
+                    AND postcode LIKE ?""",
+                (f'%{name}%', f'%{description}%', f'%{postcode}%')).fetchall()
+            results = [dict(result) for result in results]
+            for result in results:
+                ratings = db.execute("""
+                    SELECT rating FROM review
+                    WHERE location_id = ?""", str(result['id'])).fetchall()
+                if ratings:
+                    result['average_rating'] = sum(
+                        rating['rating'] for rating in ratings)/len(ratings)
+        return render_template('places/search.html', results=results)
+
+    # TODO: This displays 'Sorry, no results found' on initial render...
+    #       it shouldn't
+    return render_template('places/search.html')
+
+
+@bp.route('/place/<place_id>', methods=('GET', 'POST'))
+def place(place_id):
+    """Details page for a single place."""
+    if request.method == 'POST':
+        # Add review to the database
+        rating = request.form['rating']
+        review = request.form['review']
+        error = None
+        if not rating or not review:
+            error = 'Rating and review are required.'
+        if not g.user['id']:
+            error = 'Sorry, you must be logged in to post a review.'
+        if error is not None:
+            flash(error)
+        else:
+            db = get_db()
+            db.execute("""
+                INSERT INTO review (user_id, location_id, rating, review)
+                VALUES (?, ?, ?, ?)""",
+                (g.user['id'], place_id, rating, review))
+            db.commit()
+            flash('Review added!')
+            return redirect(url_for('places.place', place_id=place_id))
+    # Render place page
+    db = get_db()
+    location = db.execute("""
+        SELECT location.name, location.description, location.postcode,
+               location.lat, location.lng, user.username
+        FROM location
+            JOIN user ON location.user_id=user.id
+        WHERE location.id = ?""", place_id).fetchone()
+    if not location:
+        flash('Sorry, that location page was not found.')
+        return redirect(url_for('places.index'))
+
+    reviews = db.execute("""
+        SELECT review.rating, review.review, user.username
+        FROM review
+            JOIN user ON review.user_id=user.id
+        WHERE location_id = ?""", place_id).fetchall()
+    average_rating = (
+        sum(review['rating'] for review in reviews)/len(reviews)
+        if reviews else 'None')
+
+    return render_template('places/place.html', location=dict(location),
+                           reviews=reviews, average_rating=average_rating,
+                           api_key=api_key)
