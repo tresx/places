@@ -24,7 +24,7 @@ def locations():
     """AJAX endpoint, return locations within 1 degree lat/lng as JSON."""
     db = get_db()
     lat = request.args.get('lat')
-    min_lat = float(lat) - 1 
+    min_lat = float(lat) - 1
     max_lat = float(lat) + 1
     lng = request.args.get('lng')
     min_lng = float(lng) - 1

@@ -5,57 +5,56 @@
 {% endblock %}
 
 {% block content %}
-	<div id="place-map"></div>
-	<table class="place-info">
-		<tr>
-			<td><strong>Uploaded by:</strong>
-			<td>{{ location.username }}
-		<tr>
-			<td><strong>Description:</strong>
-			<td>{{ location.description }}
-		<tr>
-			<td><strong>Postcode:</strong>
-			<td>{{ location.postcode }}
-		<tr>
-			<td><strong>Average rating:</strong>
-				<td>{% if average_rating == 'None' %}{{ average_rating }}
-					{% else %}{{ average_rating|round(1, 'common') }}
-					{% endif%}
-	</table>
-	{% if reviews %}
-	    <br><hr>
-		<h3>Reviews</h3>
-		{% for review in reviews %}
-		    <div>
-				<h4>{{ review.username }} says:</h4>
-				<span>Rating: {{ review.rating }}</span><br>
-				<span>{{ review.review }}</span>
-			</div>
-		{% endfor %}
-		<br>
-	{% endif %}
-	{% if g.user %}
-		<br><hr>
-		<h3>Add review</h3>
-		<form method='post'>
-			<label for="rating">Rating (1-5)</label>
-			<input type="number" name="rating" id="rating"
-				   placeholder="Rating from 1-5" min="1" max="5" required>
-			<label for="review">Review</label>
-			<textarea name="review" id="review"
-				      placeholder="Enter a review here"
-					  required></textarea>
-			<button type="submit">Add review</button>
-		</form>
-	{% endif %}
-	
+    <div id="place-map"></div>
+    <table class="place-info">
+        <tr>
+            <td><strong>Uploaded by:</strong>
+            <td>{{ location.username }}
+        <tr>
+            <td><strong>Description:</strong>
+            <td>{{ location.description }}
+        <tr>
+            <td><strong>Postcode:</strong>
+            <td>{{ location.postcode }}
+        <tr>
+            <td><strong>Average rating:</strong>
+                <td>{% if average_rating == 'None' %}{{ average_rating }}
+                    {% else %}{{ average_rating|round(1, 'common') }}
+                    {% endif%}
+    </table>
+    {% if reviews %}
+        <br><hr>
+        <h3>Reviews</h3>
+        {% for review in reviews %}
+            <div>
+                <h4>{{ review.username }} says:</h4>
+                <span>Rating: {{ review.rating }}</span><br>
+                <span>{{ review.review }}</span>
+            </div>
+        {% endfor %}
+        <br>
+    {% endif %}
+    {% if g.user %}
+        <br><hr>
+        <h3>Add review</h3>
+        <form method='post'>
+            <label for="rating">Rating (1-5)</label>
+            <input type="number" name="rating" id="rating"
+                   placeholder="Rating from 1-5" min="1" max="5" required>
+            <label for="review">Review</label>
+            <textarea name="review" id="review"
+                      placeholder="Enter a review here"
+                      required></textarea>
+            <button type="submit">Add review</button>
+        </form>
+    {% endif %}
 
-	<script>
-		let latlng = {lat: {{ location.lat }}, lng: {{ location.lng }}};
-		let element = {{ location|tojson }};
+    <script>
+        let latlng = {lat: {{ location.lat }}, lng: {{ location.lng }}};
+        let element = {{ location|tojson }};
     </script>
-	<script
-	  src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}"></script>
-	<script src="{{ url_for('static', filename='place.js') }}" defer></script>
-
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}">
+    </script>
+    <script src="{{ url_for('static', filename='place.js') }}" defer></script>
 {% endblock %}

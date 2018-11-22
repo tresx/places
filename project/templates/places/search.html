@@ -2,46 +2,46 @@
 {% set active_page = 'search' %}
 
 {% block header %}
-	<h1>{% block title %}Search{% endblock %}</h1>
+    <h1>{% block title %}Search{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
     <form method="post">
-		<label for="name">Name</label>
-		<input name="name" id="name" value="{{ request.form['name'] }}">
-		<label for="description">Description</label>
-		<input name="description" id="description"
-		       value="{{ request.form['description'] }}">
-		<label for="postcode">Postcode</label>
-		<input name="postcode" id="postcode"
-		       value="{{ request.form['postcode'] }}">
-		<button type="submit">Search</button>
-	</form>
-	{% if results %}
-		<h1>Results</h1>
-		<table class="results-table">
-			<tr>
-				<th>Name
-				<th>Description
-				<th>Postcode
-				<th>Average rating
-			</tr>
-			{% for result in results %}
-				<tr>
-					<td>
-						<a href="{{ url_for('.place', place_id=result.id) }}">
-							{{ result.name }}</a>
-					<td>{{ result.description }}
-					<td>{{ result.postcode }}
-						<td>{% if result.average_rating %}
-								{{ result.average_rating|round(1, 'common') }}
-							{% else %}
-							None
-							{% endif %}
-				</tr>
-			{% endfor %}
-		</table>
-	{% else %}
-	    <h3>Sorry, no results found.</h3>
-	{% endif %}
+        <label for="name">Name</label>
+        <input name="name" id="name" value="{{ request.form['name'] }}">
+        <label for="description">Description</label>
+        <input name="description" id="description"
+               value="{{ request.form['description'] }}">
+        <label for="postcode">Postcode</label>
+        <input name="postcode" id="postcode"
+               value="{{ request.form['postcode'] }}">
+        <button type="submit">Search</button>
+    </form>
+    {% if results %}
+        <h1>Results</h1>
+        <table class="results-table">
+            <tr>
+                <th>Name
+                <th>Description
+                <th>Postcode
+                <th>Average rating
+            </tr>
+            {% for result in results %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('.place', place_id=result.id) }}">
+                            {{ result.name }}</a>
+                    <td>{{ result.description }}
+                    <td>{{ result.postcode }}
+                        <td>{% if result.average_rating %}
+                                {{ result.average_rating|round(1, 'common') }}
+                            {% else %}
+                            None
+                            {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h3>Sorry, no results found.</h3>
+    {% endif %}
 {% endblock %}
