@@ -4,8 +4,8 @@ from flask import (Blueprint, current_app, flash, g, redirect,
                    render_template, request, url_for)
 from werkzeug.exceptions import abort
 
-from project.auth import login_required
-from project.db import get_db
+from places.auth import login_required
+from places.db import get_db
 
 bp = Blueprint('places', __name__)
 
