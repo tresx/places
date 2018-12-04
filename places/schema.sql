@@ -16,7 +16,7 @@ CREATE TABLE location (
     postcode TEXT NOT NULL,
     lat REAL NOT NULL,
     lng REAL NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 );
 
 CREATE TABLE review (
@@ -25,6 +25,6 @@ CREATE TABLE review (
     location_id INTEGER NOT NULL,
     rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
     review TEXT DEFAULT '',
-    FOREIGN KEY (user_id) REFERENCES user (id),
-    FOREIGN KEY (location_id) REFERENCES location (id)
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE,
+    FOREIGN KEY (location_id) REFERENCES location (id) ON DELETE CASCADE
 );

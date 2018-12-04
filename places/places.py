@@ -10,7 +10,6 @@ from places.db import get_db
 bp = Blueprint('places', __name__)
 
 
-
 @bp.route('/')
 def index():
     api_key = current_app.config.get('API_KEY')
