@@ -21,7 +21,9 @@ def index():
 @bp.route('/locations')
 def locations():
     """AJAX endpoint, return locations within 1 degree lat/lng as JSON."""
-    db = get_db()
+    conn = get_db()
+    cur = conn.cursor()
+
     lat = request.args.get('lat')
     min_lat = float(lat) - 1
     max_lat = float(lat) + 1
@@ -29,7 +31,7 @@ def locations():
     min_lng = float(lng) - 1
     max_lng = float(lng) + 1
 
-    locations = db.execute("""
+    locations = cur.execute("""
         SELECT *
         FROM location
         WHERE lat > ? AND lat < ? AND lng > ? AND lng < ?""",
@@ -40,7 +42,7 @@ def locations():
         'description': row['description'],
         'postcode': row['postcode']} for row in locations]
     for result in results:
-        ratings = db.execute("""
+        ratings = cur.execute("""
             SELECT rating FROM review
             WHERE location_id = ?""", str(result['id'])).fetchall()
         if ratings:
@@ -75,8 +77,9 @@ def add():
         if error is not None:
             flash(error)
         else:
-            db = get_db()
-            db.execute("""
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute("""
                 INSERT INTO location (
                     name,
                     description,
@@ -87,7 +90,7 @@ def add():
                 )
                 VALUES (?, ?, ?, ?, ?, ?)""",
                 (name, description, postcode, g.user['id'], lat, lng))
-            db.commit()
+            conn.commit()
             flash('Location added!')
             return redirect(url_for('places.index'))
     return render_template('places/add.html')
@@ -106,8 +109,9 @@ def search():
         if error is not None:
             flash(error)
         else:
-            db = get_db()
-            results = db.execute("""
+            conn = get_db()
+            cur = conn.cursor()
+            results = cur.execute("""
                 SELECT *
                 FROM location
                 WHERE name LIKE ?
@@ -144,17 +148,19 @@ def place(place_id):
         if error is not None:
             flash(error)
         else:
-            db = get_db()
-            db.execute("""
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute("""
                 INSERT INTO review (user_id, location_id, rating, review)
                 VALUES (?, ?, ?, ?)""",
                 (g.user['id'], place_id, rating, review))
-            db.commit()
+            conn.commit()
             flash('Review added!')
             return redirect(url_for('places.place', place_id=place_id))
     # Render place page
-    db = get_db()
-    location = db.execute("""
+    conn = get_db()
+    cur = conn.cursor()
+    location = cur.execute("""
         SELECT location.name, location.description, location.postcode,
                location.lat, location.lng, user.username
         FROM location
@@ -164,7 +170,7 @@ def place(place_id):
         flash('Sorry, that location page was not found.')
         return redirect(url_for('places.index'))
 
-    reviews = db.execute("""
+    reviews = cur.execute("""
         SELECT review.rating, review.review, user.username
         FROM review
             JOIN user ON review.user_id=user.id
