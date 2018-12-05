@@ -34,7 +34,7 @@ def locations():
     locations = cur.execute("""
         SELECT *
         FROM location
-        WHERE lat > ? AND lat < ? AND lng > ? AND lng < ?""",
+        WHERE lat > %s AND lat < %s AND lng > %s AND lng < %s"""
         (min_lat, max_lat, min_lng, max_lng)).fetchall()
     results = [{
         'id': row['id'],
@@ -44,7 +44,7 @@ def locations():
     for result in results:
         ratings = cur.execute("""
             SELECT rating FROM review
-            WHERE location_id = ?""", str(result['id'])).fetchall()
+            WHERE location_id = %s""", str(result['id'])).fetchall()
         if ratings:
             result['average_rating'] = round(
                 sum(rating['rating'] for rating in ratings)/len(ratings), 1)
@@ -88,7 +88,7 @@ def add():
                     lat,
                     lng
                 )
-                VALUES (?, ?, ?, ?, ?, ?)""",
+                VALUES (%s, %s, %s, %s, %s, %s)""",
                 (name, description, postcode, g.user['id'], lat, lng))
             conn.commit()
             flash('Location added!')
@@ -114,15 +114,15 @@ def search():
             results = cur.execute("""
                 SELECT *
                 FROM location
-                WHERE name LIKE ?
-                    AND description LIKE ?
-                    AND postcode LIKE ?""",
+                WHERE name LIKE %s
+                    AND description LIKE %s
+                    AND postcode LIKE %s""",
                 (f'%{name}%', f'%{description}%', f'%{postcode}%')).fetchall()
             results = [dict(result) for result in results]
             for result in results:
                 ratings = db.execute("""
                     SELECT rating FROM review
-                    WHERE location_id = ?""", str(result['id'])).fetchall()
+                    WHERE location_id = %s""", str(result['id'])).fetchall()
                 if ratings:
                     result['average_rating'] = sum(
                         rating['rating'] for rating in ratings)/len(ratings)
@@ -152,7 +152,7 @@ def place(place_id):
             cur = conn.cursor()
             cur.execute("""
                 INSERT INTO review (user_id, location_id, rating, review)
-                VALUES (?, ?, ?, ?)""",
+                VALUES (%s, %s, %s, %s)"""
                 (g.user['id'], place_id, rating, review))
             conn.commit()
             flash('Review added!')
@@ -165,7 +165,7 @@ def place(place_id):
                location.lat, location.lng, user.username
         FROM location
             JOIN user ON location.user_id=user.id
-        WHERE location.id = ?""", place_id).fetchone()
+        WHERE location.id = %s""" place_id).fetchone()
     if not location:
         flash('Sorry, that location page was not found.')
         return redirect(url_for('places.index'))
@@ -174,7 +174,7 @@ def place(place_id):
         SELECT review.rating, review.review, user.username
         FROM review
             JOIN user ON review.user_id=user.id
-        WHERE location_id = ?""", place_id).fetchall()
+        WHERE location_id = %s""", place_id).fetchall()
     average_rating = (
         sum(review['rating'] for review in reviews)/len(reviews)
         if reviews else 'None')
