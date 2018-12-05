@@ -165,7 +165,7 @@ def place(place_id):
                location.lat, location.lng, user.username
         FROM location
             JOIN user ON location.user_id=user.id
-        WHERE location.id = %s""" place_id).fetchone()
+        WHERE location.id = %s""", (place_id,)).fetchone()
     if not location:
         flash('Sorry, that location page was not found.')
         return redirect(url_for('places.index'))
