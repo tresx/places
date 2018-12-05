@@ -34,7 +34,7 @@ def locations():
     locations = cur.execute("""
         SELECT *
         FROM location
-        WHERE lat > %s AND lat < %s AND lng > %s AND lng < %s"""
+        WHERE lat > %s AND lat < %s AND lng > %s AND lng < %s""",
         (min_lat, max_lat, min_lng, max_lng)).fetchall()
     results = [{
         'id': row['id'],
