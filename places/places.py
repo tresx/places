@@ -1,6 +1,5 @@
 import googlemaps
 import json
-import psycopg2.extras
 from flask import (Blueprint, current_app, flash, g, redirect,
                    render_template, request, url_for)
 from werkzeug.exceptions import abort
@@ -22,7 +21,7 @@ def index():
 @bp.route('/locations')
 def locations():
     """AJAX endpoint, return locations within 1 degree lat/lng as JSON."""
-    cur = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur = get_db().cursor()
     lat = request.args.get('lat')
     min_lat = float(lat) - 1
     max_lat = float(lat) + 1
@@ -111,7 +110,7 @@ def search():
             flash(error)
         else:
             conn = get_db()
-            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur = conn.cursor()
             cur.execute("""
                 SELECT *
                 FROM locations
@@ -140,7 +139,7 @@ def place(place_id):
     """Details page for a single place."""
     api_key = current_app.config.get('API_KEY')
     conn = get_db()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur = conn.cursor()
     if request.method == 'POST':
         # Add review to the database
         rating = request.form['rating']

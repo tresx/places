@@ -1,6 +1,4 @@
 import functools
-import psycopg2.extras
-
 from flask import (Blueprint, Flask, flash, g, redirect, render_template,
                    request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -16,7 +14,7 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        cur = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur = get_db().cursor()
         cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
         g.user = cur.fetchone()
 
@@ -59,7 +57,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
         conn = get_db()
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur = conn.cursor()
         error = None
         cur.execute('SELECT * FROM users WHERE username = %s', (username,))
         user = cur.fetchone()

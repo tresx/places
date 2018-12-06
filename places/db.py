@@ -1,5 +1,5 @@
 import psycopg2
-
+from psycopg2.extras import DictCursor
 import click
 from flask import current_app, g
 from flask.cli import with_appcontext
@@ -8,7 +8,8 @@ from flask.cli import with_appcontext
 def get_db():
     """Return postgres connection object."""
     if 'db' not in g:
-        g.db = psycopg2.connect(current_app.config['DATABASE'])
+        g.db = psycopg2.connect(dsn=current_app.config['DATABASE'],
+                                cursor_factory=DictCursor)
     return g.db
 
 
