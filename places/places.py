@@ -1,5 +1,6 @@
 import googlemaps
 import json
+import psycopg2.extras
 from flask import (Blueprint, current_app, flash, g, redirect,
                    render_template, request, url_for)
 from werkzeug.exceptions import abort
@@ -21,9 +22,7 @@ def index():
 @bp.route('/locations')
 def locations():
     """AJAX endpoint, return locations within 1 degree lat/lng as JSON."""
-    conn = get_db()
-    cur = conn.cursor()
-
+    cur = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
     lat = request.args.get('lat')
     min_lat = float(lat) - 1
     max_lat = float(lat) + 1
@@ -31,20 +30,22 @@ def locations():
     min_lng = float(lng) - 1
     max_lng = float(lng) + 1
 
-    locations = cur.execute("""
+    cur.execute("""
         SELECT *
         FROM locations
         WHERE lat > %s AND lat < %s AND lng > %s AND lng < %s""",
-        (min_lat, max_lat, min_lng, max_lng)).fetchall()
+        (min_lat, max_lat, min_lng, max_lng))
+    locations = cur.fetchall()
     results = [{
         'id': row['id'],
         'name': row['name'],
         'description': row['description'],
         'postcode': row['postcode']} for row in locations]
     for result in results:
-        ratings = cur.execute("""
+        cur.execute("""
             SELECT rating FROM reviews
-            WHERE location_id = %s""", str(result['id'])).fetchall()
+            WHERE location_id = %s""", str(result['id']))
+        ratings = cur.fetchall()
         if ratings:
             result['average_rating'] = round(
                 sum(rating['rating'] for rating in ratings)/len(ratings), 1)
@@ -110,19 +111,21 @@ def search():
             flash(error)
         else:
             conn = get_db()
-            cur = conn.cursor()
-            results = cur.execute("""
+            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute("""
                 SELECT *
                 FROM locations
                 WHERE name LIKE %s
                     AND description LIKE %s
                     AND postcode LIKE %s""",
-                (f'%{name}%', f'%{description}%', f'%{postcode}%')).fetchall()
+                (f'%{name}%', f'%{description}%', f'%{postcode}%'))
+            results = cur.fetchall()
             results = [dict(result) for result in results]
             for result in results:
-                ratings = db.execute("""
+                cur.execute("""
                     SELECT rating FROM reviews
-                    WHERE location_id = %s""", str(result['id'])).fetchall()
+                    WHERE location_id = %s""", str(result['id']))
+                ratings = cur.fetchall()
                 if ratings:
                     result['average_rating'] = sum(
                         rating['rating'] for rating in ratings)/len(ratings)
@@ -136,6 +139,8 @@ def search():
 def place(place_id):
     """Details page for a single place."""
     api_key = current_app.config.get('API_KEY')
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         # Add review to the database
         rating = request.form['rating']
@@ -148,33 +153,31 @@ def place(place_id):
         if error is not None:
             flash(error)
         else:
-            conn = get_db()
-            cur = conn.cursor()
             cur.execute("""
                 INSERT INTO reviews (user_id, location_id, rating, review)
-                VALUES (%s, %s, %s, %s)"""
+                VALUES (%s, %s, %s, %s)""",
                 (g.user['id'], place_id, rating, review))
             conn.commit()
             flash('Review added!')
             return redirect(url_for('places.place', place_id=place_id))
     # Render place page
-    conn = get_db()
-    cur = conn.cursor()
-    location = cur.execute("""
+    cur.execute("""
         SELECT locations.name, locations.description, locations.postcode,
                locations.lat, locations.lng, users.username
         FROM locations
             JOIN users ON locations.user_id=users.id
-        WHERE locations.id = %s""", (place_id,)).fetchone()
+        WHERE locations.id = %s""", (place_id,))
+    location = cur.fetchone()
     if not location:
         flash('Sorry, that location page was not found.')
         return redirect(url_for('places.index'))
 
-    reviews = cur.execute("""
+    cur.execute("""
         SELECT reviews.rating, reviews.review, users.username
         FROM reviews
             JOIN users ON reviews.user_id=users.id
-        WHERE location_id = %s""", place_id).fetchall()
+        WHERE location_id = %s""", place_id)
+    reviews = cur.fetchall()
     average_rating = (
         sum(review['rating'] for review in reviews)/len(reviews)
         if reviews else 'None')

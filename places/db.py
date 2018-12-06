@@ -22,7 +22,7 @@ def close_db(e=None):
 def init_db():
     """Initialise database from schema.sql file."""
     cur = get_db().cursor()
-    cur.execute(open('schema.sql', 'r').read())
+    cur.execute(open('places/schema.sql', 'r').read())
 
 
 @click.command('init-db')

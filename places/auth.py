@@ -1,4 +1,5 @@
 import functools
+import psycopg2.extras
 
 from flask import (Blueprint, Flask, flash, g, redirect, render_template,
                    request, session, url_for)
@@ -15,8 +16,9 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = get_db().cursor().execute('SELECT * FROM users WHERE id = %s',
-            (user_id,)).fetchone()
+        cur = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+        g.user = cur.fetchone()
 
 
 def login_required(view):
@@ -35,18 +37,17 @@ def register():
         password = request.form['password']
         conn = get_db()
         cur = conn.cursor()
-        error = None
-        if not username:
-            error = 'Username is required.'
-        elif not password:
-            error = 'Password is required.'
-        elif cur.execute('SELECT id FROM users WHERE username = %s',
-                (username,)).fetchone() is not None:
+        error = ('Username is required.' if not username else
+                 'Password is required.' if not password else None)
+        cur.execute("SELECT id FROM users WHERE username = %s", (username,))
+        if cur.fetchone() is not None:
             error = f'User {username} is already registered.'
         if error is None:
-            cur.execute('INSERT INTO users (username, password) VALUES (%s, %s)',
-                       (username, generate_password_hash(password)))
+            cur.execute(
+                'INSERT INTO users (username, password) VALUES (%s, %s)',
+                (username, generate_password_hash(password)))
             conn.commit()
+            flash('User registration successful!')
             return redirect(url_for('auth.login'))
         flash(error)
     return render_template('auth/register.html')
@@ -58,10 +59,10 @@ def login():
         username = request.form['username']
         password = request.form['password']
         conn = get_db()
-        cur = conn.cursor()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         error = None
-        user = cur.execute('SELECT * FROM users WHERE username = %s',
-            (username,)).fetchone()
+        cur.execute('SELECT * FROM users WHERE username = %s', (username,))
+        user = cur.fetchone()
         if user is None:
             error = 'Incorrect username.'
         elif not check_password_hash(user['password'], password):

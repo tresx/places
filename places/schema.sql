@@ -1,15 +1,15 @@
 DROP TABLE IF EXISTS users CASCADE;
-DROP TABLE IF EXISTS location CASCADE;
-DROP TABLE IF EXISTS review CASCADE;
+DROP TABLE IF EXISTS locations CASCADE;
+DROP TABLE IF EXISTS reviews CASCADE;
 
 CREATE TABLE users (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     username TEXT NOT NULL,
     password TEXT NOT NULL
 );
 
 CREATE TABLE locations (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     name TEXT NOT NULL,
     description TEXT NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE locations (
 );
 
 CREATE TABLE reviews (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     location_id INTEGER NOT NULL,
     rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
