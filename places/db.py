@@ -1,8 +1,9 @@
-import psycopg2
-from psycopg2.extras import DictCursor
 import click
 from flask import current_app, g
 from flask.cli import with_appcontext
+import os
+import psycopg2
+from psycopg2.extras import DictCursor
 
 
 def get_db():
@@ -22,8 +23,9 @@ def close_db(e=None):
 
 def init_db():
     """Initialise database from schema.sql file."""
-    cur = get_db().cursor()
-    cur.execute(open('places/schema.sql', 'r').read())
+    #cur = get_db().cursor()
+    #cur.execute(open('places/schema.sql', 'r').read())
+    os.system('sudo -u postgres psql mydb < places/schema.sql')
 
 
 @click.command('init-db')
