@@ -119,6 +119,9 @@ def search():
                     AND postcode LIKE %s""",
                 (f'%{name}%', f'%{description}%', f'%{postcode}%'))
             results = cur.fetchall()
+            if not results:
+                flash('Sorry, no results found.')
+                return render_template('places/search.html')
             results = [dict(result) for result in results]
             for result in results:
                 cur.execute("""
@@ -130,7 +133,6 @@ def search():
                         rating['rating'] for rating in ratings)/len(ratings)
         return render_template('places/search.html', results=results)
 
-    # TODO: Should not display 'Sorry, no results found' on initial render
     return render_template('places/search.html')
 
 

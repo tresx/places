@@ -1,1 +1,1 @@
-web: cat places/schema.sql | heroku pg:psql; gunicorn places:app
+web: heroku pg:psql < places/schema.sql; gunicorn places:app
