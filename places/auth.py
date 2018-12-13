@@ -1,6 +1,6 @@
 import functools
 from flask import (Blueprint, Flask, flash, g, redirect, render_template,
-                   request, session, url_for)
+                   request, session, url_for, make_response)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from places.db import get_db
@@ -45,7 +45,8 @@ def register():
                 'INSERT INTO users (username, password) VALUES (%s, %s)',
                 (username, generate_password_hash(password)))
             conn.commit()
-            flash('User registration successful! Please log in below.')
+            session['username'] = username
+            flash('Account creation successful! Please log in below.')
             return redirect(url_for('auth.login'))
         flash(error)
     return render_template('auth/register.html')
