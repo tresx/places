@@ -12,7 +12,7 @@ bp = Blueprint('places', __name__)
 
 @bp.route('/')
 def index():
-    if 'login' in request.referrer:
+    if request.referrer and 'login' in request.referrer:
         flash('You are now logged in.')
     api_key = current_app.config.get('API_KEY')
     return render_template('places/index.html',
