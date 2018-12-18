@@ -1,5 +1,5 @@
 import os
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 from flask import Flask
 
@@ -7,19 +7,15 @@ from flask import Flask
 def create_app(test_config=None):
     # Create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    app.config.update(
-        SECRET_KEY='dev',
-        DATABASE=os.getenv('DATABASE_URL')
-    )
+    app.config['SECRET_KEY'] = 'dev'
+    app.config['DATABASE'] = os.getenv('DATABASE_URL')
 
     if test_config is None:
         # Load the instance config, if it exists, when not testing
-        basedir = os.path.abspath(os.path.dirname(__file__))
-        load_dotenv(os.path.join(basedir, 'config.env'))
-        app.config.update(
-            SECRET_KEY=os.getenv('SECRET_KEY'),
-            API_KEY=os.getenv('API_KEY')
-        )
+        #basedir = os.path.abspath(os.path.dirname(__file__))
+        #load_dotenv(os.path.join(basedir, 'config.env'))
+        app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+        app.config['API_KEY'] = os.getenv('API_KEY')
 
     else:
         # Load the test config if passed in

@@ -7,9 +7,12 @@
 {% block content %}
     <form method="post">
         <label for="username">Username</label>
-        <input name="username" id="username" required>
+        <input name="username" id="username" required autofocus>
         <label for="password">Password</label>
         <input type="password" name="password" id="password" required>
+        <label for="toggle-password">Show password</label>
+        <input type="checkbox" id="toggle-password">
         <button type="submit">Register</button>
     </form>
+    <script src="{{ url_for('static', filename='auth.js') }}"></script>
 {% endblock %}
