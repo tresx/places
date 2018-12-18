@@ -1,6 +1,7 @@
 import functools
 from flask import (Blueprint, Flask, flash, g, redirect, render_template,
                    request, session, url_for, make_response)
+from itsdangerous import URLSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from places.db import get_db
