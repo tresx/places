@@ -1,6 +1,4 @@
 import os
-#from dotenv import load_dotenv
-
 from flask import Flask
 
 
@@ -12,8 +10,6 @@ def create_app(test_config=None):
 
     if test_config is None:
         # Load the instance config, if it exists, when not testing
-        #basedir = os.path.abspath(os.path.dirname(__file__))
-        #load_dotenv(os.path.join(basedir, 'config.env'))
         app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
         app.config['API_KEY'] = os.getenv('API_KEY')
 
@@ -27,11 +23,6 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # A simple page that says hello
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
-
     from . import db
     db.init_app(app)
 
@@ -43,5 +34,6 @@ def create_app(test_config=None):
     app.add_url_rule('/', endpoint='index')
 
     return app
+
 
 app = create_app()
