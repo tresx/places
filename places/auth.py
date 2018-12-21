@@ -97,6 +97,7 @@ def logout():
 
 @bp.route('/reset_password', methods=('GET', 'POST'))
 def reset_password():
+    """Reset password route, accessed from link on login page."""
     if request.method == 'POST':
         email = request.form['email']
         send_password_reset_email(email)
@@ -140,7 +141,7 @@ def new_password(token=None):
     cur.execute("SELECT id, email FROM users WHERE email = %s", (email,))
     user = cur.fetchone()
     if not user:
-        flash(f'Email {email} not found.')
+        flash(f'User {email} not found.')
         return redirect(url_for('auth.login'))
     session['email'] = user['email']
     flash('Please enter your new password below.')
