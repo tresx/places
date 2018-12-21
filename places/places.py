@@ -2,7 +2,6 @@ import googlemaps
 import json
 from flask import (Blueprint, current_app, flash, g, redirect,
                    render_template, request, url_for)
-from werkzeug.exceptions import abort
 
 from places.auth import login_required
 from places.db import get_db

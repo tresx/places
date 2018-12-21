@@ -93,12 +93,14 @@ body {
     flex-direction: column;
 }
 
-.content label {
+.content label,
+.content .label {
     font-weight: bold;
     margin-bottom: 0.5em;
 }
 
-.content input {
+.content input,
+.content .text {
     margin-bottom: 1em;
 }
 
