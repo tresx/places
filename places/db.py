@@ -25,6 +25,9 @@ def init_db():
     """Initialise database from schema.sql file."""
     #cur = get_db().cursor()
     #cur.execute(open('places/schema.sql', 'r').read())
+
+    # From within psql: \i places/schema.sql
+
     os.system('sudo -u postgres psql mydb < places/schema.sql')
 
 
