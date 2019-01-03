@@ -9,7 +9,7 @@
     <table class="place-info">
         <tr>
             <td><strong>Uploaded by:</strong>
-            <td>{{ location.username }}
+            <td>{{ location.email }}
         <tr>
             <td><strong>Description:</strong>
             <td>{{ location.description }}
@@ -27,7 +27,7 @@
         <h3>Reviews</h3>
         {% for review in reviews %}
             <div>
-                <h4>{{ review.username }} says:</h4>
+                <h4>{{ review.email }} says:</h4>
                 <span>Rating: {{ review.rating }}</span><br>
                 <span>{{ review.review }}</span>
             </div>

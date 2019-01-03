@@ -164,7 +164,7 @@ def place(place_id):
     # Render place page
     cur.execute("""
         SELECT locations.name, locations.description, locations.postcode,
-               locations.lat, locations.lng, users.username
+               locations.lat, locations.lng, users.email
         FROM locations
             JOIN users ON locations.user_id=users.id
         WHERE locations.id = %s""", (place_id,))
@@ -174,7 +174,7 @@ def place(place_id):
         return redirect(url_for('places.index'))
 
     cur.execute("""
-        SELECT reviews.rating, reviews.review, users.username
+        SELECT reviews.rating, reviews.review, users.email
         FROM reviews
             JOIN users ON reviews.user_id=users.id
         WHERE location_id = %s""", place_id)
