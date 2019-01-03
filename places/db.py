@@ -28,7 +28,7 @@ def init_db():
 
     # From within psql: \i places/schema.sql
 
-    os.system('sudo -u postgres psql mydb < places/schema.sql')
+    os.system('sudo -u postgres psql places_dev < places/schema.sql')
 
 
 @click.command('init-db')
