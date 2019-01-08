@@ -1,7 +1,8 @@
+import os
+
 import click
 from flask import current_app, g
 from flask.cli import with_appcontext
-import os
 import psycopg2
 from psycopg2.extras import DictCursor
 

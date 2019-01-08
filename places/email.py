@@ -1,7 +1,7 @@
+from email.message import EmailMessage
 import os
 import smtplib
 import ssl
-from email.message import EmailMessage
 
 
 def send_email(subject, recipients, text_body, html_body=None,

@@ -1,5 +1,6 @@
-import googlemaps
 import json
+
+import googlemaps
 from flask import (Blueprint, current_app, flash, g, redirect,
                    render_template, request, url_for)
 

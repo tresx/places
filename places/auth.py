@@ -1,4 +1,5 @@
 import functools
+
 from flask import (Blueprint, current_app, Flask, flash, g, redirect,
                    render_template, request, session, url_for, make_response)
 from itsdangerous import URLSafeSerializer
