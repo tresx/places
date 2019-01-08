@@ -124,6 +124,10 @@ body {
     height: 30px;
 }
 
+.place-info td:first-child {
+    padding-right: .5rem;
+}
+
 #place-map {
     height: 300px;
     width: 100%;
