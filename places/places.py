@@ -61,34 +61,33 @@ def add():
     api_key = current_app.config.get('API_KEY')
     gmaps = googlemaps.Client(key=api_key)
     if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
-        postcode = request.form['postcode']
-
-        # Calculate lat and lng from postcode and insert into database as well
-        geocode_result = gmaps.geocode(postcode)
-        lat = geocode_result[0]['geometry']['location']['lat']
-        lng = geocode_result[0]['geometry']['location']['lng']
-
+        name = request.form['name'].strip()
+        description = request.form['description'].strip()
+        postcode = request.form['postcode'].strip().upper()
         error = None
         if not name or not description or not postcode:
             error = 'Name, description and postcode are required.'
-        elif not geocode_result:
+        # Calculate lat and lng from postcode
+        geocode_result = gmaps.geocode('components=postal_code:' + postcode)
+        if not geocode_result:
             error = 'Error geocoding postcode.'
+        else:
+            lat = geocode_result[0]['geometry']['location']['lat']
+            lng = geocode_result[0]['geometry']['location']['lng']
+
         if error is not None:
             flash(error)
         else:
+            # Format postcode correctly for database
+            postcode = postcode.replace(' ', '')  # Remove all spaces
+            incode = postcode[len(postcode)-3:] # Last 3 characters
+            outcode = postcode[0:len(postcode)-3]  # Rest of postcode
+            postcode = f'{outcode} {incode}'
             conn = get_db()
             cur = conn.cursor()
             cur.execute("""
-                INSERT INTO locations (
-                    name,
-                    description,
-                    postcode,
-                    user_id,
-                    lat,
-                    lng
-                )
+                INSERT INTO locations (name, description, postcode,
+                                       user_id, lat, lng)
                 VALUES (%s, %s, %s, %s, %s, %s)""",
                 (name, description, postcode, g.user['id'], lat, lng))
             conn.commit()
