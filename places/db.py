@@ -23,12 +23,13 @@ def close_db(e=None):
 
 def init_db():
     """Initialise database from schema.sql file."""
-    #cur = get_db().cursor()
-    #cur.execute(open('places/schema.sql', 'r').read())
 
-    # From within psql: \i places/schema.sql
-
-    os.system('sudo -u postgres psql mydb < places/schema.sql')
+    with open(
+            os.path.join(os.path.dirname(__file__), 'schema.sql'), 'rb') as f:
+        _data_sql = f.read().decode('utf-8')
+        with get_db() as conn:
+            conn.cursor().execute(_data_sql)
+        conn.close()
 
 
 @click.command('init-db')
