@@ -17,4 +17,4 @@ def internal_error(error):
 # Cause a 500 error for testing purposes
 @bp.route('/err500')
 def err500():
-    return self.app.put('/whoops')
+    return abort(500)
