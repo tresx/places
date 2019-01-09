@@ -7,6 +7,7 @@
 
 {% block content %}
     <form method="post">
+        <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
         <label for="name">Name</label>
         <input name="name" id="name" value="{{ request.form['name'] }}"
                required>

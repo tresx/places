@@ -7,6 +7,7 @@ import psycopg2
 from psycopg2.extras import DictCursor
 
 from places import create_app
+from places.auth import generate_csrf_token
 from places.db import init_db
 
 with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
@@ -45,7 +46,10 @@ class TestPlaces(unittest.TestCase):
     ## Helper methods
     def register(self, email, password):
         return self.client.post('/auth/register',
-                                data={'email': email, 'password': password},
+                                data={
+                                    'email': email,
+                                    'password': password
+                                },
                                 follow_redirects=True)
 
     def login(self, email, password):

@@ -1,6 +1,7 @@
 import functools
+import secrets
 
-from flask import (Blueprint, current_app, Flask, flash, g, redirect,
+from flask import (abort, Blueprint, current_app, Flask, flash, g, redirect,
                    render_template, request, session, url_for, make_response)
 from itsdangerous import URLSafeSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -33,6 +34,26 @@ def load_logged_in_user():
         cur = get_db().cursor()
         cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
         g.user = cur.fetchone()
+
+
+@bp.before_app_request
+def csrf_protect():
+    # Ignore csrf protection during testing
+    if current_app.testing:
+        pass
+    elif request.method == 'POST':
+        token = session.pop('_csrf_token', None)
+        if not token or token != request.form['_csrf_token']:
+            abort(403)
+
+
+def generate_csrf_token():
+    if '_csrf_token' not in session:
+        session['_csrf_token'] = secrets.token_urlsafe()
+    return session['_csrf_token']
+
+
+bp.add_app_template_global(generate_csrf_token, name='csrf_token')
 
 
 def login_required(view):

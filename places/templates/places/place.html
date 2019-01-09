@@ -38,6 +38,7 @@
         <br><hr>
         <h3>Add review</h3>
         <form method='post'>
+            <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
             <label for="rating">Rating (1-5)</label>
             <input type="number" name="rating" id="rating"
                    placeholder="Rating from 1-5" min="1" max="5" required>

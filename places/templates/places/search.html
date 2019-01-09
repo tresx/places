@@ -7,6 +7,7 @@
 
 {% block content %}
     <form method="post">
+        <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
         <label for="name">Name</label>
         <input name="name" id="name" value="{{ request.form['name'] }}">
         <label for="description">Description</label>
@@ -33,11 +34,11 @@
                             {{ result.name }}</a>
                     <td>{{ result.description }}
                     <td>{{ result.postcode }}
-                        <td>{% if result.average_rating %}
-                                {{ result.average_rating|round(1, 'common') }}
-                            {% else %}
+                    <td>{% if result.average_rating %}
+                            {{ result.average_rating|round(1, 'common') }}
+                        {% else %}
                             None
-                            {% endif %}
+                        {% endif %}
                 </tr>
             {% endfor %}
         </table>
