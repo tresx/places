@@ -2,7 +2,7 @@ import json
 
 import googlemaps
 from flask import (Blueprint, current_app, flash, g, redirect,
-                   render_template, request, url_for)
+                   render_template, request, session, url_for)
 
 from places.auth import login_required
 from places.db import get_db
@@ -12,8 +12,10 @@ bp = Blueprint('places', __name__)
 
 @bp.route('/')
 def index():
-    if request.referrer and 'login' in request.referrer:
-        flash('You are now logged in.')
+    if (request.referrer and
+        'login' in request.referrer and
+        session.get('user_id')):
+            flash('You are now logged in.')
     api_key = current_app.config.get('API_KEY')
     return render_template('places/index.html',
                            api_key=api_key)
